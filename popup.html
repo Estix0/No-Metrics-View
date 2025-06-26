@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Controls</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      background: #aaaaaa;
+      color: #222;
+    }
+
+    .container {
+      background: #fafafa;
+      padding: 15px 20px;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      max-width: 250px;
+    }
+
+    label {
+      font-size: 14px;
+      user-select: none;
+    }
+
+    .switch-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .switch-label input {
+      display: none;
+    }
+
+    .slider {
+      position: relative;
+      width: 42px;
+      height: 22px;
+      background-color: #ccc;
+      border-radius: 22px;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+    }
+
+    .switch-label input:checked + .slider {
+      background-color: #4caf50;
+    }
+
+    .switch-label input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    .kofi-button {
+      margin-top: 15px;
+      display: inline-block;
+      background: #212121;
+      padding: 6px 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .kofi-button img {
+      height: 36px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <label><b>Twitter: </b></label>
+
+    <label class="switch-label">Hide Replies
+      <input type="checkbox" id="replies">
+      <span class="slider"></span>
+    </label>
+
+    <label class="switch-label">Hide Likes
+      <input type="checkbox" id="likes">
+      <span class="slider"></span>
+    </label>
+
+    <label class="switch-label">Hide Retweets
+      <input type="checkbox" id="retweets">
+      <span class="slider"></span>
+    </label>
+
+    <label class="switch-label">Hide Bookmarks
+      <input type="checkbox" id="bookmarks">
+      <span class="slider"></span>
+    </label>
+
+    <label class="switch-label">Hide Views
+      <input type="checkbox" id="views">
+      <span class="slider"></span>
+    </label>
+
+    <br>
+
+    <label><b>Twitch: </b></label>
+
+    <label class="switch-label">Hide Views
+      <input type="checkbox" id="twitchViews">
+      <span class="slider"></span>
+    </label>
+
+    <label class="switch-label">Hide 7tv Raids
+      <input type="checkbox" id="seventvRaids">
+      <span class="slider"></span>
+    </label>
+
+    <div class="kofi-button">
+      <a href="https://ko-fi.com/B0B51GYNQ8" target="_blank" rel="noopener noreferrer">
+        <img src="https://storage.ko-fi.com/cdn/kofi3.png" alt="Buy Me a Coffee at ko-fi.com">
+      </a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
