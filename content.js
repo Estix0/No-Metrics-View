@@ -19,7 +19,10 @@
       '.tw-media-card-stat',
       '[aria-label="individual-view-count"]'
     ],
-    seventvRaids: ['.seventv-raid-message-container span.bold:nth-child(2)']
+    seventvRaids: [
+      '.seventv-raid-message-container span.bold:nth-child(2)',
+      '[data-test-selector="raid-message"]'
+    ]
   };
 
   let currentPrefs = {
@@ -126,6 +129,20 @@
       toggleSeventvRaids(currentPrefs.seventvRaids);
     }, 150);
   }
+
+  const hideRaidMessages = () => {
+    selectors.seventvRaids.forEach(selector => {
+      const el = document.querySelector(selector);
+      if (el) el.style.display = 'none';
+    });
+  };
+
+  // Initial hide in case they're already present
+  hideRaidMessages();
+
+  // Observe DOM changes for dynamically injected raid messages
+  const raidObserver = new MutationObserver(hideRaidMessages);
+  raidObserver.observe(document.body, { childList: true, subtree: true });
 
   storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
