@@ -22,6 +22,10 @@
     seventvRaids: [
       '.seventv-raid-message-container span.bold:nth-child(2)',
       '[data-test-selector="raid-message"]'
+    ],
+    seventvUserMessages: [
+      '.seventv-user-message:has(.seventv-chat-user-username span:contains("StreamElements"))',
+      '.seventv-user-message:has(.seventv-chat-user-username span:contains("streamelements"))'
     ]
   };
 
@@ -33,12 +37,13 @@
     views: true,
     twitchViews: true,
     seventvRaids: true,
+    seventvUserMessages: true
   };
 
   async function loadPrefs() {
     const prefs = await storage.get([
       "replies", "likes", "retweets", "bookmarks", "views",
-      "twitchViews", "seventvRaids"
+      "twitchViews", "seventvRaids", "seventvUserMessages"
     ]);
     currentPrefs = {
       replies: prefs.replies ?? true,
@@ -47,7 +52,8 @@
       bookmarks: prefs.bookmarks ?? true,
       views: prefs.views ?? true,
       twitchViews: prefs.twitchViews ?? true,
-      seventvRaids: prefs.seventvRaids ?? true
+      seventvRaids: prefs.seventvRaids ?? true,
+      seventvUserMessages: prefs.seventvUserMessages ?? true
     };
   }
 
@@ -85,7 +91,7 @@
     });
   }
 
-  // 7tv Raids toggle
+  // 7TV Raids toggle
   function toggleSeventvRaids(shouldHide) {
     document.querySelectorAll('.seventv-raid-message-container').forEach(container => {
       const boldSpans = container.querySelectorAll('span.bold');
@@ -95,16 +101,25 @@
     });
   }
 
+  // Remove StreamElements messages
+  function removeSeventvUserMessages(shouldRemove) {
+    if (!shouldRemove) return;
+
+    document.querySelectorAll('.seventv-user-message').forEach(msg => {
+      const name = msg.querySelector('.seventv-chat-user-username span')?.textContent?.trim().toLowerCase();
+      if (name === 'streamelements') msg.remove();
+    });
+  }
+
   function applyToggles() {
     ['replies', 'likes', 'retweets', 'bookmarks'].forEach(key => {
       toggleTwitterStatNumbers(key, currentPrefs[key]);
     });
 
     toggleTwitterStatNumbers('views', currentPrefs.views);
-
     toggleTwitchViews(currentPrefs.twitchViews);
-
     toggleSeventvRaids(currentPrefs.seventvRaids);
+    removeSeventvUserMessages(currentPrefs.seventvUserMessages);
   }
 
   // MutationObserver for Twitter dynamic content
@@ -127,6 +142,7 @@
     setInterval(() => {
       toggleTwitchViews(currentPrefs.twitchViews);
       toggleSeventvRaids(currentPrefs.seventvRaids);
+      removeSeventvUserMessages(currentPrefs.seventvUserMessages);
     }, 150);
   }
 
@@ -139,9 +155,13 @@
 
   // Initial hide in case they're already present
   hideRaidMessages();
+  removeSeventvUserMessages(true);
 
-  // Observe DOM changes for dynamically injected raid messages
-  const raidObserver = new MutationObserver(hideRaidMessages);
+  // Observe DOM changes for dynamically injected raid messages and user messages
+  const raidObserver = new MutationObserver(() => {
+    hideRaidMessages();
+    removeSeventvUserMessages(currentPrefs.seventvUserMessages);
+  });
   raidObserver.observe(document.body, { childList: true, subtree: true });
 
   storage.onChanged.addListener((changes, area) => {
@@ -154,9 +174,7 @@
         changed = true;
       }
     }
-    if (changed) {
-      applyToggles();
-    }
+    if (changed) applyToggles();
   });
 
   init();
