@@ -16,6 +16,7 @@
       '[data-a-target="animated-channel-viewers-count"]',
       '[data-a-target="preview-card-viewers-count"]',
       '[data-a-target="side-nav-live-status"]',
+      '[data-a-target="home-live-overlay-button"]',
       '.tw-media-card-stat',
       '[aria-label="individual-view-count"]'
     ],
