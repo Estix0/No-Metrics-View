@@ -1,7 +1,8 @@
 (async function () {
   'use strict';
 
-  const storage = typeof browser !== "undefined" ? browser.storage.local : chrome.storage.local;
+  const storageRoot = typeof browser !== "undefined" ? browser.storage : chrome.storage;
+  const storage = storageRoot.local;
 
   const selectors = {
     replies: '[data-testid="reply"]',
@@ -24,13 +25,12 @@
       '.seventv-raid-message-container span.bold:nth-child(2)',
       '[data-test-selector="raid-message"]'
     ],
-    seventvUserMessages: [
-      '.seventv-user-message:has(.seventv-chat-user-username span:contains("StreamElements"))',
-      '.seventv-user-message:has(.seventv-chat-user-username span:contains("streamelements"))',
-      '.seventv-user-message:has(.seventv-chat-user-username span:contains("SoundAlerts"))',
-      '.seventv-user-message:has(.seventv-chat-user-username span:contains("soundalerts"))'
-    ]
+    twitchGoLive: 'a[href*="dashboard.twitch.tv"][href*="/stream"]'
   };
+
+  const hostname = location.hostname;
+  const isTwitter = hostname.includes("x.com") || hostname.includes("twitter.com");
+  const isTwitch = hostname.includes("twitch.tv");
 
   let currentPrefs = {
     replies: true,
@@ -40,13 +40,14 @@
     views: true,
     twitchViews: true,
     seventvRaids: true,
-    seventvUserMessages: true
+    seventvUserMessages: true,
+    twitchGoLive: true
   };
 
   async function loadPrefs() {
     const prefs = await storage.get([
       "replies", "likes", "retweets", "bookmarks", "views",
-      "twitchViews", "seventvRaids", "seventvUserMessages"
+      "twitchViews", "seventvRaids", "seventvUserMessages", "twitchGoLive"
     ]);
     currentPrefs = {
       replies: prefs.replies ?? true,
@@ -56,7 +57,8 @@
       views: prefs.views ?? true,
       twitchViews: prefs.twitchViews ?? true,
       seventvRaids: prefs.seventvRaids ?? true,
-      seventvUserMessages: prefs.seventvUserMessages ?? true
+      seventvUserMessages: prefs.seventvUserMessages ?? true,
+      twitchGoLive: prefs.twitchGoLive ?? true
     };
   }
 
@@ -85,7 +87,7 @@
     }
   }
 
- function toggleTwitchViews(shouldHide) {
+  function toggleTwitchViews(shouldHide) {
     selectors.twitchViews.forEach(selector => {
       document.querySelectorAll(selector).forEach(el => {
         el.style.display = shouldHide ? 'none' : '';
@@ -99,27 +101,43 @@
       parentContainer.childNodes.forEach(node => {
         if (node.nodeType === Node.TEXT_NODE) {
           if (shouldHide) {
-            if (node.nodeValue.trim() !== '') {
-              node._originalText = node.nodeValue; 
-              node.nodeValue = ''; 
+            if (node.nodeValue.trim() !== '' && /\d/.test(node.nodeValue)) {
+              node._originalText = node.nodeValue;
+              node.nodeValue = '';
             }
           } else {
             if (node.nodeValue === '' && node._originalText) {
               node.nodeValue = node._originalText;
             }
           }
-        } 
-        else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'span') {
-          const text = node.textContent.toLowerCase();
-          if (text.includes('viewer') || text.includes('widz')) {
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'span') {
+          if (/\d/.test(node.textContent)) {
             node.style.display = shouldHide ? 'none' : '';
           }
         }
       });
     });
-  } 
+
+    document.querySelectorAll('[data-test-selector="metadata-layout__split-top"] p').forEach(p => {
+      const dot = p.previousElementSibling;
+      const hasDotBefore = dot && dot.tagName === 'SPAN' && dot.textContent.trim() === '·';
+      const isAfterCategory = p.matches('a[data-a-target="video-info-game-boxart-link"] ~ p');
+      if ((isAfterCategory || hasDotBefore) && /\d/.test(p.textContent)) {
+        p.style.display = shouldHide ? 'none' : '';
+        if (hasDotBefore) {
+          dot.style.display = shouldHide ? 'none' : '';
+        }
+      }
+    });
+  }
 
   function toggleSeventvRaids(shouldHide) {
+    selectors.seventvRaids.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.style.display = shouldHide ? 'none' : '';
+      });
+    });
+
     document.querySelectorAll('.seventv-raid-message-container').forEach(container => {
       const boldSpans = container.querySelectorAll('span.bold');
       if (boldSpans.length > 1) {
@@ -137,57 +155,54 @@
     });
   }
 
-  function applyToggles() {
-    ['replies', 'likes', 'retweets', 'bookmarks'].forEach(key => {
-      toggleTwitterStatNumbers(key, currentPrefs[key]);
+  function toggleTwitchGoLive(shouldHide) {
+    document.querySelectorAll(selectors.twitchGoLive).forEach(targetLink => {
+      const wrapper = targetLink.closest('div');
+      const target = (wrapper && wrapper.parentElement && wrapper.children.length === 1)
+        ? wrapper
+        : targetLink;
+      target.style.display = shouldHide ? 'none' : '';
     });
-
-    toggleTwitterStatNumbers('views', currentPrefs.views);
-    toggleTwitchViews(currentPrefs.twitchViews);
-    toggleSeventvRaids(currentPrefs.seventvRaids);
-    removeSeventvUserMessages(currentPrefs.seventvUserMessages);
   }
 
-  const twitterObserver = new MutationObserver(() => {
+  function applyToggles() {
+    if (isTwitter) {
+      ['replies', 'likes', 'retweets', 'bookmarks', 'views'].forEach(key => {
+        toggleTwitterStatNumbers(key, currentPrefs[key]);
+      });
+    }
+
+    if (isTwitch) {
+      toggleTwitchViews(currentPrefs.twitchViews);
+      toggleSeventvRaids(currentPrefs.seventvRaids);
+      removeSeventvUserMessages(currentPrefs.seventvUserMessages);
+      toggleTwitchGoLive(currentPrefs.twitchGoLive);
+    }
+  }
+
+  const domObserver = new MutationObserver(() => {
     applyToggles();
   });
-
-  function observeTwitter() {
-    twitterObserver.observe(document.body, { childList: true, subtree: true });
-  }
 
   async function init() {
     await loadPrefs();
     applyToggles();
 
-    if (location.hostname.includes("x.com") || location.hostname.includes("twitter.com")) {
-      observeTwitter();
+    if (isTwitter || isTwitch) {
+      domObserver.observe(document.body, { childList: true, subtree: true });
     }
 
-    setInterval(() => {
-      toggleTwitchViews(currentPrefs.twitchViews);
-      toggleSeventvRaids(currentPrefs.seventvRaids);
-      removeSeventvUserMessages(currentPrefs.seventvUserMessages);
-    }, 150);
+    if (isTwitch) {
+      setInterval(() => {
+        toggleTwitchViews(currentPrefs.twitchViews);
+        toggleSeventvRaids(currentPrefs.seventvRaids);
+        removeSeventvUserMessages(currentPrefs.seventvUserMessages);
+        toggleTwitchGoLive(currentPrefs.twitchGoLive);
+      }, 150);
+    }
   }
 
-  const hideRaidMessages = () => {
-    selectors.seventvRaids.forEach(selector => {
-      const el = document.querySelector(selector);
-      if (el) el.style.display = 'none';
-    });
-  };
-
-  hideRaidMessages();
-  removeSeventvUserMessages(true);
-
-  const raidObserver = new MutationObserver(() => {
-    hideRaidMessages();
-    removeSeventvUserMessages(currentPrefs.seventvUserMessages);
-  });
-  raidObserver.observe(document.body, { childList: true, subtree: true });
-
-  storage.onChanged.addListener((changes, area) => {
+  storageRoot.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
 
     let changed = false;

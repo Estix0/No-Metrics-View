@@ -1,33 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Controls</title>
+  <meta charset="utf-8">
+  <title>No Metrics View — Controls</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 15px;
-      background: #aaaaaa;
-      color: #222;
+      margin: 0 auto;
+      padding: 12px;
+      width: 290px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #18181b;
+      color: #f4f4f5;
     }
 
     .container {
-      background: #fafafa;
-      padding: 15px 20px;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      max-width: 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    label {
-      font-size: 14px;
-      user-select: none;
+    .section {
+      background: #242429;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #323238;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #323238;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #9da3ae;
+    }
+
+    .section-toggle {
+      background: none;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9da3ae;
+      cursor: pointer;
+    }
+
+    .section-toggle:hover {
+      background: #323238;
+      color: #f4f4f5;
     }
 
     .switch-label {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 8px 0;
+      gap: 10px;
+      margin: 6px 0;
+      font-size: 13px;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .switch-label:last-child {
+      margin-bottom: 0;
+    }
+
+    .label-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+      color: #f4f4f5;
+    }
+
+    .label-hint {
+      font-size: 11px;
+      color: #8b929e;
     }
 
     .switch-label input {
@@ -36,105 +97,118 @@
 
     .slider {
       position: relative;
-      width: 42px;
-      height: 22px;
-      background-color: #ccc;
-      border-radius: 22px;
-      transition: background 0.3s;
+      flex-shrink: 0;
+      width: 38px;
+      height: 20px;
+      background-color: #3f3f46;
+      border-radius: 20px;
+      transition: background 0.2s;
       cursor: pointer;
     }
 
     .slider::before {
       content: "";
       position: absolute;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: white;
+      background: #ffffff;
       top: 2px;
       left: 2px;
-      transition: transform 0.3s;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
     }
 
     .switch-label input:checked + .slider {
-      background-color: #4caf50;
+      background-color: #22c55e;
     }
 
     .switch-label input:checked + .slider::before {
-      transform: translateX(20px);
-    }
-
-    .kofi-button {
-      margin-top: 15px;
-      display: inline-block;
-      background: #212121;
-      padding: 6px 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    }
-
-    .kofi-button img {
-      height: 36px;
-      display: block;
+      transform: translateX(18px);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <label><b>Twitter: </b></label>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Twitch · UI &amp; Chat</span>
+        <button type="button" class="section-toggle" data-keys="twitchGoLive,seventvUserMessages">All off</button>
+      </div>
 
-    <label class="switch-label">Hide Replies
-      <input type="checkbox" id="replies">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">Hide Go Live Button</span>
+        <input type="checkbox" id="twitchGoLive">
+        <span class="slider"></span>
+      </label>
 
-    <label class="switch-label">Hide Likes
-      <input type="checkbox" id="likes">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">
+          <span>Hide Bot Messages</span>
+          <span class="label-hint">StreamElements, SoundAlerts</span>
+        </span>
+        <input type="checkbox" id="seventvUserMessages">
+        <span class="slider"></span>
+      </label>
+    </div>
 
-    <label class="switch-label">Hide Retweets
-      <input type="checkbox" id="retweets">
-      <span class="slider"></span>
-    </label>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Twitch · Metrics</span>
+        <button type="button" class="section-toggle" data-keys="twitchViews,seventvRaids">All off</button>
+      </div>
 
-    <label class="switch-label">Hide Bookmarks
-      <input type="checkbox" id="bookmarks">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">Hide Viewer Counts</span>
+        <input type="checkbox" id="twitchViews">
+        <span class="slider"></span>
+      </label>
 
-    <label class="switch-label">Hide Views
-      <input type="checkbox" id="views">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">Hide 7TV Raid Viewers</span>
+        <input type="checkbox" id="seventvRaids">
+        <span class="slider"></span>
+      </label>
+    </div>
 
-    <br>
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Twitter / X · Metrics</span>
+        <button type="button" class="section-toggle" data-keys="replies,likes,retweets,bookmarks,views">All off</button>
+      </div>
 
-    <label><b>Twitch: </b></label>
+      <label class="switch-label">
+        <span class="label-text">Hide Replies</span>
+        <input type="checkbox" id="replies">
+        <span class="slider"></span>
+      </label>
 
-    <label class="switch-label">Hide Views
-      <input type="checkbox" id="twitchViews">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">Hide Likes</span>
+        <input type="checkbox" id="likes">
+        <span class="slider"></span>
+      </label>
 
-    <label class="switch-label">Hide 7tv Raids
-      <input type="checkbox" id="seventvRaids">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">Hide Retweets</span>
+        <input type="checkbox" id="retweets">
+        <span class="slider"></span>
+      </label>
 
-    <label class="switch-label">Hide Streamelements
-      <input type="checkbox" id="seventvUserMessages">
-      <span class="slider"></span>
-    </label>
+      <label class="switch-label">
+        <span class="label-text">Hide Bookmarks</span>
+        <input type="checkbox" id="bookmarks">
+        <span class="slider"></span>
+      </label>
 
-    <div class="kofi-button">
-      <a href="https://ko-fi.com/B0B51GYNQ8" target="_blank" rel="noopener noreferrer">
-        <img src="https://storage.ko-fi.com/cdn/kofi3.png" alt="Buy Me a Coffee at ko-fi.com">
-      </a>
+      <label class="switch-label">
+        <span class="label-text">Hide Views</span>
+        <input type="checkbox" id="views">
+        <span class="slider"></span>
+      </label>
     </div>
   </div>
 
   <script src="popup.js"></script>
 </body>
 </html>
-
