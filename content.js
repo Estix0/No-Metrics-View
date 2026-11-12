@@ -26,7 +26,9 @@
     ],
     seventvUserMessages: [
       '.seventv-user-message:has(.seventv-chat-user-username span:contains("StreamElements"))',
-      '.seventv-user-message:has(.seventv-chat-user-username span:contains("streamelements"))'
+      '.seventv-user-message:has(.seventv-chat-user-username span:contains("streamelements"))',
+      '.seventv-user-message:has(.seventv-chat-user-username span:contains("SoundAlerts"))',
+      '.seventv-user-message:has(.seventv-chat-user-username span:contains("soundalerts"))'
     ]
   };
 
@@ -71,7 +73,6 @@
       });
     });
 
-    // For views, special handling:
     if (key === "views") {
       document.querySelectorAll('[data-testid="app-text-transition-container"]').forEach(el => {
         const parentDiv = el.closest('div[dir="ltr"]');
@@ -84,15 +85,40 @@
     }
   }
 
-  function toggleTwitchViews(shouldHide) {
+ function toggleTwitchViews(shouldHide) {
     selectors.twitchViews.forEach(selector => {
       document.querySelectorAll(selector).forEach(el => {
         el.style.display = shouldHide ? 'none' : '';
       });
     });
-  }
 
-  // 7TV Raids toggle
+    document.querySelectorAll('.tw-channel-status-text-indicator').forEach(indicator => {
+      const parentContainer = indicator.parentElement?.parentElement;
+      if (!parentContainer) return;
+
+      parentContainer.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (shouldHide) {
+            if (node.nodeValue.trim() !== '') {
+              node._originalText = node.nodeValue; 
+              node.nodeValue = ''; 
+            }
+          } else {
+            if (node.nodeValue === '' && node._originalText) {
+              node.nodeValue = node._originalText;
+            }
+          }
+        } 
+        else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'span') {
+          const text = node.textContent.toLowerCase();
+          if (text.includes('viewer') || text.includes('widz')) {
+            node.style.display = shouldHide ? 'none' : '';
+          }
+        }
+      });
+    });
+  } 
+
   function toggleSeventvRaids(shouldHide) {
     document.querySelectorAll('.seventv-raid-message-container').forEach(container => {
       const boldSpans = container.querySelectorAll('span.bold');
@@ -102,13 +128,12 @@
     });
   }
 
-  // Remove StreamElements messages
   function removeSeventvUserMessages(shouldRemove) {
     if (!shouldRemove) return;
 
     document.querySelectorAll('.seventv-user-message').forEach(msg => {
       const name = msg.querySelector('.seventv-chat-user-username span')?.textContent?.trim().toLowerCase();
-      if (name === 'streamelements') msg.remove();
+      if (name === 'streamelements' || name === 'soundalerts') msg.remove();
     });
   }
 
@@ -123,7 +148,6 @@
     removeSeventvUserMessages(currentPrefs.seventvUserMessages);
   }
 
-  // MutationObserver for Twitter dynamic content
   const twitterObserver = new MutationObserver(() => {
     applyToggles();
   });
@@ -154,11 +178,9 @@
     });
   };
 
-  // Initial hide in case they're already present
   hideRaidMessages();
   removeSeventvUserMessages(true);
 
-  // Observe DOM changes for dynamically injected raid messages and user messages
   const raidObserver = new MutationObserver(() => {
     hideRaidMessages();
     removeSeventvUserMessages(currentPrefs.seventvUserMessages);
@@ -181,4 +203,3 @@
   init();
 
 })();
-
