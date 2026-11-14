@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>No Metrics View — Controls</title>
@@ -48,6 +49,14 @@
       color: #9da3ae;
     }
 
+    .section-title.twitch {
+      color: #a970ff;
+    }
+
+    .section-title.twitter {
+      color: #1d9bf0;
+    }
+
     .section-toggle {
       background: none;
       border: none;
@@ -69,20 +78,21 @@
       justify-content: space-between;
       align-items: center;
       gap: 10px;
-      margin: 6px 0;
+      margin: 11px 0;
+      padding: 2px 0;
       font-size: 13px;
       user-select: none;
       cursor: pointer;
     }
 
     .switch-label:last-child {
-      margin-bottom: 0;
+      margin-bottom: 2px;
     }
 
     .label-text {
       display: flex;
       flex-direction: column;
-      line-height: 1.25;
+      line-height: 1.5;
       color: #f4f4f5;
     }
 
@@ -119,20 +129,21 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
     }
 
-    .switch-label input:checked + .slider {
+    .switch-label input:checked+.slider {
       background-color: #22c55e;
     }
 
-    .switch-label input:checked + .slider::before {
+    .switch-label input:checked+.slider::before {
       transform: translateX(18px);
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="section">
       <div class="section-header">
-        <span class="section-title">Twitch · UI &amp; Chat</span>
+        <span class="section-title twitch">Twitch · UI &amp; Chat</span>
         <button type="button" class="section-toggle" data-keys="twitchGoLive,seventvUserMessages">All off</button>
       </div>
 
@@ -154,7 +165,7 @@
 
     <div class="section">
       <div class="section-header">
-        <span class="section-title">Twitch · Metrics</span>
+        <span class="section-title twitch">Twitch · Metrics</span>
         <button type="button" class="section-toggle" data-keys="twitchViews,seventvRaids">All off</button>
       </div>
 
@@ -173,7 +184,7 @@
 
     <div class="section">
       <div class="section-header">
-        <span class="section-title">Twitter / X · Metrics</span>
+        <span class="section-title twitter">Twitter / X · Metrics</span>
         <button type="button" class="section-toggle" data-keys="replies,likes,retweets,bookmarks,views">All off</button>
       </div>
 
@@ -211,4 +222,5 @@
 
   <script src="popup.js"></script>
 </body>
+
 </html>
